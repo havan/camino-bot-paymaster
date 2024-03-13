@@ -1,4 +1,4 @@
-# Camino Bot Paymaster Concept
+# Camino Bot PayMaster Concept
 
 This is a tought experiment about implementing a "paymaster" feature for cheque
 mechanism of Camino Messenger's bot concept.
@@ -35,16 +35,19 @@ funds for multiple bot accounts (wallets).
 
 - The design is coded in Solidity but the concept is language agnostic.
   Cryptographically, it can be implemented in any language.
-- The design is not audited for security in any way. For cryptographic security
+- **Security:** The design is not audited for security in any way. For cryptographic security
   we may consider using some standards like EIP-712[^2][^3]
+- **PayMaster Address in Cheques:** It may be a good idea to include PayMaster's
+  contract address in the cheque, so the cheque is only valid for a specific
+  PayMaster
 
 ## Design
 
-### BotPaymaster
+### BotPayMaster
 
 #### Partner
 
-- Partners will deploy a BotPaymaster smart contract. 
+- Partners will deploy a BotPayMaster smart contract. 
 - And then approve bot addresses using this paymaster contract's `approveBot` function.
 
 #### Bot
@@ -69,7 +72,11 @@ funds for multiple bot accounts (wallets).
 - Because the cheques can only be cashed out to the original receiver address,
   it is safe to let any address to initiate the `cashCheque` function. This
   enables one to implement another wallet to be used only to pay gas.
-- In the `cashCheque` function, the Paymaster recreates the cheque hash with the given fields of 'from`, `to`, `amount` and `nonce. Then it tries to recover the pubkey using the signature. If successfull, it checks if the `from` address 
+- In the `cashCheque` function, the PayMaster recreates the cheque hash with the given fields of 'from`, `to`, `amount` and `nonce. Then it tries to recover the pubkey using the signature. If successfull, it checks if the `from` address
+
+## Diagram
+
+![BotPayMaster Diagram](./assets/BotPayMaster-Concept-Design-1.png)
 
 [^1]: The smart contract can be improved to be able to spend other wallet's
 ERC20-like funds usind the `approve` method of the ERC20 standard.

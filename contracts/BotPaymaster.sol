@@ -6,7 +6,7 @@ import "./Ownable.sol";
 // TODO: Optimize for gas 
 
 //
-contract BotPaymaster is Ownable {
+contract BotPayMaster is Ownable {
 
     struct BotTransaction {
         uint256 lastNonce;

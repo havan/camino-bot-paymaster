@@ -5,7 +5,8 @@ import "./Ownable.sol";
 
 // TODO: Optimize for gas 
 
-contract BotManager is Ownable {
+//
+contract BotPaymaster is Ownable {
 
     struct BotTransaction {
         uint256 lastNonce;
@@ -19,7 +20,7 @@ contract BotManager is Ownable {
     // Events
     event BotApproved(address indexed bot);
     event BotRevoked(address indexed bot);
-    event CheckCashed(address indexed from, address indexed to, uint256 amount, uint256 nonce);
+    event ChequeCashed(address indexed from, address indexed to, uint256 amount, uint256 nonce);
 
     function approveBot(address bot) public onlyOwner {
         approvedBots[bot] = true;
@@ -40,7 +41,7 @@ contract BotManager is Ownable {
     }
 
     function recoverSigner(bytes32 messageHash, bytes memory signature) public pure returns (address) {
-        // Check the signature's length
+        // Cheque the signature's length
         require(signature.length == 65, "Invalid signature length");
 
         bytes32 r;
@@ -66,7 +67,7 @@ contract BotManager is Ownable {
         return ecrecover(messageHash, v, r, s);
     }
 
-    function cashCheck(address from, address to, uint256 amount, uint256 nonce, bytes memory signature) public {
+    function cashCheque(address from, address to, uint256 amount, uint256 nonce, bytes memory signature) public {
         require(approvedBots[from], "Bot not approved");
         require(to != address(0), "Invalid recipient address");
 
@@ -76,9 +77,10 @@ contract BotManager is Ownable {
         require(amount > botTx.lastAmount, "Amount not greater than last known amount");
 
         bytes32 messageHash = getMessageHash(from, to, amount, nonce);
-        // Check if the signature matches the from address. This proves that the
+
+        // Cheque if the signature matches the from address. This proves that the
         // bot has created a signature with the correct nonce, amount and to
-        // address, which in our context is a valid check.
+        // address, which in our context is a valid cheque.
         require(recoverSigner(messageHash, signature) == from, "Invalid signature");
 
         // Calculate the amount to transfer
@@ -91,7 +93,7 @@ contract BotManager is Ownable {
         // Transfer the funds to the "to" address
         payable(to).transfer(transferAmount);
 
-        emit CheckCashed(from, to, amount, nonce);
+        emit ChequeCashed(from, to, amount, nonce);
     }
 
     function getBotTransaction(address _from, address _to) public view returns (BotTransaction memory) {

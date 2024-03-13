@@ -1,5 +1,8 @@
 # Camino Bot Paymaster Concept
 
+This is a tought experiment about implementing a "paymaster" feature for cheque
+mechanism of Camino Messenger's bot concept.
+
 ## Rationale
 
 Camino Messenger has a concept of "bots" that are used to communicate between
@@ -32,6 +35,8 @@ funds for multiple bot accounts (wallets).
 
 - The design is coded in Solidity but the concept is language agnostic.
   Cryptographically, it can be implemented in any language.
+- The design is not audited for security in any way. For cryptographic security
+  we may consider using some standards like EIP-712[^2][^3]
 
 ## Design
 
@@ -40,28 +45,33 @@ funds for multiple bot accounts (wallets).
 #### Partner
 
 - Partners will deploy a BotPaymaster smart contract. 
-- And then register bot addresses using this paymaster contract.
+- And then approve bot addresses using this paymaster contract's `approveBot` function.
 
 #### Bot
 
-- Any registered bot wallet can create cheques and send them to the receiver.
+- Any approved bot can create cheques, sign them and send them to the receiver.
 - Bots create a cheque by creating a hash with `from`, `to`, `amount`, and `nonce`
 
   ```solidity
   keccak256(abi.encodePacked(from, to, amount, nonce));
   ```
 
-  **from:** the bot's address
-  **to:** the address of the receiver
-  **amount:** the amount of tokens/coins to send to the reciever
-  **nonce:** incremental nonce to prevent replay of the already cached out cheques
+  - **from:** the bot's address
+  - **to:** the address of the receiver
+  - **amount:** the amount of tokens/coins to send to the reciever
+  - **nonce:** incremental nonce to prevent replay of the already cached out cheques
+
+- Then this cheque and signature is send to the receiver.
 
 #### Receiver
 
-- The receiver (or any one that have access to the cheque) can cash out the cheque. Because
-  the cheques can only be cashed out to the original receiver address, it is safe to let any
-  address to initiate the `cashCheque` function.
-- In the `cashCheque` function, the Paymaster recreates the cheque hash with the given
+- The receiver (or any one that have access to the cheque) can cash out the cheque. 
+- Because the cheques can only be cashed out to the original receiver address,
+  it is safe to let any address to initiate the `cashCheque` function. This
+  enables one to implement another wallet to be used only to pay gas.
+- In the `cashCheque` function, the Paymaster recreates the cheque hash with the given fields of 'from`, `to`, `amount` and `nonce. Then it tries to recover the pubkey using the signature. If successfull, it checks if the `from` address 
 
-[^1]: The smart contract can be improved to be able to spend other wallet's ETC20-like funds 
-      usind the `approve` method of the ERC20 standard.
+[^1]: The smart contract can be improved to be able to spend other wallet's
+ERC20-like funds usind the `approve` method of the ERC20 standard.
+[^2]: https://eips.ethereum.org/EIPS/eip-712
+[^3]: More info on security: https://soliditydeveloper.com/ecrecover

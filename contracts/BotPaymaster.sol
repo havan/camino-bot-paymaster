@@ -13,7 +13,7 @@ contract BotPaymaster is Ownable {
         uint256 lastAmount;
     }
 
-    mapping(address => mapping(address => BotTransaction)) private botTransactions;
+    mapping(address => mapping(address => BotTransaction)) private botTransactionsStore;
 
     mapping(address => bool) public approvedBots;
 
@@ -36,11 +36,11 @@ contract BotPaymaster is Ownable {
         return approvedBots[bot];
     }
 
-    function getMessageHash(address from, address to, uint256 amount, uint256 nonce) public pure returns (bytes32) {
+    function getChequeHash(address from, address to, uint256 amount, uint256 nonce) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(from, to, amount, nonce));
     }
 
-    function recoverSigner(bytes32 messageHash, bytes memory signature) public pure returns (address) {
+    function recoverSigner(bytes32 chequeHash, bytes memory signature) public pure returns (address) {
         // Cheque the signature's length
         require(signature.length == 65, "Invalid signature length");
 
@@ -64,31 +64,31 @@ contract BotPaymaster is Ownable {
         require(v == 27 || v == 28, "Invalid signature 'v' value");
 
         // Recover the signer address
-        return ecrecover(messageHash, v, r, s);
+        return ecrecover(chequeHash, v, r, s);
     }
 
     function cashCheque(address from, address to, uint256 amount, uint256 nonce, bytes memory signature) public {
         require(approvedBots[from], "Bot not approved");
         require(to != address(0), "Invalid recipient address");
 
-        BotTransaction memory botTx = botTransactions[from][to];
+        BotTransaction memory botTx = botTransactionsStore[from][to];
         
         require(nonce > botTx.lastNonce, "Nonce too low");
         require(amount > botTx.lastAmount, "Amount not greater than last known amount");
 
-        bytes32 messageHash = getMessageHash(from, to, amount, nonce);
+        bytes32 chequeHash = getChequeHash(from, to, amount, nonce);
 
         // Cheque if the signature matches the from address. This proves that the
         // bot has created a signature with the correct nonce, amount and to
         // address, which in our context is a valid cheque.
-        require(recoverSigner(messageHash, signature) == from, "Invalid signature");
+        require(recoverSigner(chequeHash, signature) == from, "Invalid signature");
 
         // Calculate the amount to transfer
         uint256 previousAmount = botTx.lastAmount;
         uint256 transferAmount = amount - previousAmount;
 
         // Update the stored values in the struct
-        botTransactions[from][to] = BotTransaction(nonce, amount);
+        botTransactionsStore[from][to] = BotTransaction(nonce, amount);
 
         // Transfer the funds to the "to" address
         payable(to).transfer(transferAmount);
@@ -97,6 +97,6 @@ contract BotPaymaster is Ownable {
     }
 
     function getBotTransaction(address _from, address _to) public view returns (BotTransaction memory) {
-        return botTransactions[_from][_to];
+        return botTransactionsStore[_from][_to];
     }
 }

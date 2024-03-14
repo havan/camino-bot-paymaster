@@ -87,7 +87,7 @@ an technical explanation by GPT-4 for the contract.
 
 ## Technical Overview of the BotPayMaster Smart Contract by GPT-4
 
-The `BotPayMaster` contract facilitates secure and verified transactions between bots and their recipients on the Ethereum blockchain. Designed with a focus on security and integrity, this contract allows for the approval of bots, management of transaction records, and ensures only authorized transactions are processed.
+The `BotPayMaster` contract facilitates secure and verified transactions between bots and their recipients on the Camino Network. Designed with a focus on security and integrity, this contract allows for the approval of bots, management of transaction records, and ensures only authorized transactions are processed.
 
 ### Core Data Structures
 
@@ -146,7 +146,7 @@ The `BotPayMaster` contract facilitates secure and verified transactions between
 
 ### Summary
 
-`BotPayMaster` is a smart contract designed for managing and validating transactions between approved bots and their recipients. It incorporates cryptographic verification, access control, and transaction history to ensure security and integrity in bot-initiated transactions. The contract enables partners to oversee bot funds, approve bot transactions, and ensure only valid transactions are processed, thereby fostering trust and reliability in bot-mediated transactions on the Ethereum blockchain.
+`BotPayMaster` is a smart contract designed for managing and validating transactions between approved bots and their recipients. It incorporates cryptographic verification, access control, and transaction history to ensure security and integrity in bot-initiated transactions. The contract enables partners to oversee bot funds, approve bot transactions, and ensure only valid transactions are processed, thereby fostering trust and reliability in bot-mediated transactions on the Camino Network.
 
 
 [^1]: The smart contract can be improved to be able to spend other wallet's

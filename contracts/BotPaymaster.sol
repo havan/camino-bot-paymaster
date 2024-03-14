@@ -132,12 +132,11 @@ contract BotPayMaster is Ownable {
             return false;
         }
 
-        // Generate the message hash from the parameters
-        bytes32 messageHash = getChequeHash(from, to, amount, nonce);
+        // Generate the cheque hash from the parameters
+        bytes32 chequeHash = getChequeHash(from, to, amount, nonce);
 
         // Check if the signature is valid and matches the 'from' address
-        // Note: This assumes the existence of a correct implementation of recoverSigner
-        if (recoverSigner(messageHash, signature) != from) {
+        if (recoverSigner(chequeHash, signature) != from) {
             return false;
         }
 

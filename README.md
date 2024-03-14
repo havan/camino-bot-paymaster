@@ -45,6 +45,12 @@ funds for multiple bot accounts (wallets).
 
 ### BotPayMaster
 
+BotPayMaster contract holds the funds. Approves and revokes bots. Provides
+functions to validate and cash out cheques.
+
+Below is the workflow about how the whole process will take place. There is also
+an technical explanation by GPT-4 for the contract.
+
 #### Partner
 
 - Partners will deploy a BotPayMaster smart contract. 
@@ -78,6 +84,70 @@ funds for multiple bot accounts (wallets).
 ## Diagram
 
 ![BotPayMaster Diagram](./assets/BotPayMaster-Concept-Design-1.png)
+
+## Technical Overview of the BotPayMaster Smart Contract by GPT-4
+
+The `BotPayMaster` contract facilitates secure and verified transactions between bots and their recipients on the Ethereum blockchain. Designed with a focus on security and integrity, this contract allows for the approval of bots, management of transaction records, and ensures only authorized transactions are processed.
+
+### Core Data Structures
+
+- **BotTransaction**: A struct capturing details of transactions between a bot and a recipient, including `lastNonce` and `lastAmount` to prevent replay attacks and ensure amount progression.
+
+- **botTransactionsStore**: A nested mapping (`address => mapping(address => BotTransaction)`) storing `BotTransaction` records for each bot-recipient pair, enabling transaction history tracking and validation.
+
+### State Variables
+
+- **approvedBots**: A mapping (`address => bool`) that records the approval status of each bot, dictating whether it's authorized to initiate transactions.
+
+### Events
+
+- **BotApproved**: Emitted when a bot is approved.
+- **BotRevoked**: Emitted when a bot's approval is revoked.
+- **ChequeCashed**: Emitted upon the successful cashing of a cheque, detailing the transaction.
+
+### Functions
+
+#### approveBot
+- **Purpose**: Approves a bot, allowing it to initiate transactions.
+- **Modifiers**: `onlyOwner`, ensuring that only the contract owner can approve bots.
+- **Effects**: Marks the bot as approved in `approvedBots` and emits `BotApproved`.
+
+#### revokeBot
+- **Purpose**: Revokes the approval of a bot, preventing it from initiating future transactions.
+- **Modifiers**: `onlyOwner`.
+- **Effects**: Marks the bot as not approved in `approvedBots` and emits `BotRevoked`.
+
+#### isBotApproved
+- **Purpose**: Checks if a bot is approved.
+- **Return**: Boolean value indicating the bot's approval status.
+
+#### getChequeHash
+- **Purpose**: Generates a hash of the transaction details for integrity verification.
+- **Modifiers**: `pure`.
+- **Return**: The keccak256 hash of the encoded transaction details (`from`, `to`, `amount`, `nonce`).
+
+#### recoverSigner
+- **Purpose**: Recovers the signer's address from the cheque hash and signature to verify transaction authenticity.
+- **Modifiers**: `pure`.
+- **Return**: The address of the signer, validated against the provided signature.
+
+#### cashCheque
+- **Purpose**: Validates and processes a transaction cheque from a bot to a recipient.
+- **Validation**: Checks for bot approval, valid recipient address, nonce progression, and amount progression. Also verifies the signature against the signer's address.
+- **Effects**: Updates the transaction record in `botTransactionsStore` and transfers the specified amount to the recipient. Emits `ChequeCashed`.
+
+#### isChequeValid
+- **Purpose**: Allows for the validation of a cheque without processing the transaction, useful for verifying transaction details off-chain.
+- **Return**: Boolean indicating the validity of the cheque based on approval status, recipient validity, nonce, amount, and signature authenticity.
+
+#### getBotTransaction
+- **Purpose**: Retrieves the last transaction details for a specific bot-recipient pair.
+- **Return**: The `BotTransaction` record containing the last nonce and amount.
+
+### Summary
+
+`BotPayMaster` is a smart contract designed for managing and validating transactions between approved bots and their recipients. It incorporates cryptographic verification, access control, and transaction history to ensure security and integrity in bot-initiated transactions. The contract enables partners to oversee bot funds, approve bot transactions, and ensure only valid transactions are processed, thereby fostering trust and reliability in bot-mediated transactions on the Ethereum blockchain.
+
 
 [^1]: The smart contract can be improved to be able to spend other wallet's
 ERC20-like funds usind the `approve` method of the ERC20 standard.

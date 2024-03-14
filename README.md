@@ -77,10 +77,14 @@ an technical explanation by GPT-4 for the contract.
 #### Receiver
 
 - The receiver (or any one that have access to the cheque) can cash out the cheque. 
-- Because the cheques can only be cashed out to the original receiver address,
-  it is safe to let any address to initiate the `cashCheque` function. This
-  enables one to implement another wallet to be used only to pay gas.
-- In the `cashCheque` function, the PayMaster recreates the cheque hash with the given fields of 'from`, `to`, `amount` and `nonce. Then it tries to recover the pubkey using the signature. If successfull, it checks if the `from` address
+  - Because the cheques can only be cashed out to the original receiver address,
+  it is safe to let any address to initiate the `cashCheque` function. 
+  - **TX Fee Account:** This enables one to implement another wallet to be used only to pay gas
+    fees.
+- In the `cashCheque` function, the PayMaster recreates the cheque hash with the
+  given fields of `from`, `to`, `amount` and `nonce`. Then it tries to recover
+  the pubkey using the signature. If successfull, it checks if the `from`
+  address is same with the recovered one.
 - Receiver can use `isChequeValid` function to validate if the cheque is valid, without cashing it out.
 
 ## Diagram

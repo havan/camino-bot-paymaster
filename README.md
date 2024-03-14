@@ -1,6 +1,6 @@
 # Camino Bot PayMaster Concept
 
-This is a tought experiment about implementing a "paymaster" feature for cheque
+This is a concept study about implementing a "paymaster" feature for cheque
 mechanism of Camino Messenger's bot concept.
 
 ## Rationale
@@ -25,7 +25,7 @@ funds for multiple bot accounts (wallets).
 
 - Bots will generate cheques for each message they send via the Camino Messenger
 - Each message will contain at least one cheque (network fee)
-- A message can have multiple cheques. Ex: service fee that will be paid to the
+- A message can have multiple cheques. Ex: provider fee that will be paid to the
   service provider
 - All of these cheques are **off-chain** and are signed by the bot with its private key
 - It should be possible to verify the signature of the cheque **on-chain** and
@@ -36,10 +36,10 @@ funds for multiple bot accounts (wallets).
 - The design is coded in Solidity but the concept is language agnostic.
   Cryptographically, it can be implemented in any language.
 - **Security:** The design is not audited for security in any way. For cryptographic security
-  we may consider using some standards like EIP-712[^2][^3]
+  we may consider using some standards like EIP-712[^2][^3].
 - **PayMaster Address in Cheques:** It may be a good idea to include PayMaster's
   contract address in the cheque, so the cheque is only valid for a specific
-  PayMaster
+  PayMaster.
 
 ## Design
 
@@ -73,6 +73,7 @@ funds for multiple bot accounts (wallets).
   it is safe to let any address to initiate the `cashCheque` function. This
   enables one to implement another wallet to be used only to pay gas.
 - In the `cashCheque` function, the PayMaster recreates the cheque hash with the given fields of 'from`, `to`, `amount` and `nonce. Then it tries to recover the pubkey using the signature. If successfull, it checks if the `from` address
+- Receiver can use `isChequeValid` function to validate if the cheque is valid, without cashing it out.
 
 ## Diagram
 

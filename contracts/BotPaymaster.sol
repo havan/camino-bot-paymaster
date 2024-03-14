@@ -5,7 +5,7 @@ import "./Ownable.sol";
 
 // TODO: Optimize for gas 
 
-//
+// Partner deploys this contract to manage funds of the their bots.
 contract BotPayMaster is Ownable {
 
     struct BotTransaction {
@@ -67,7 +67,13 @@ contract BotPayMaster is Ownable {
         return ecrecover(chequeHash, v, r, s);
     }
 
-    function cashCheque(address from, address to, uint256 amount, uint256 nonce, bytes memory signature) public {
+    function cashCheque(
+        address from, 
+        address to, 
+        uint256 amount, 
+        uint256 nonce, 
+        bytes memory signature
+    ) public {
         require(approvedBots[from], "Bot not approved");
         require(to != address(0), "Invalid recipient address");
 
@@ -79,8 +85,8 @@ contract BotPayMaster is Ownable {
         bytes32 chequeHash = getChequeHash(from, to, amount, nonce);
 
         // Cheque if the signature matches the from address. This proves that the
-        // bot has created a signature with the correct nonce, amount and to
-        // address, which in our context is a valid cheque.
+        // bot has created a signature with the correct from, to, amount, and nonce.
+        // Which in our context is a valid cheque.
         require(recoverSigner(chequeHash, signature) == from, "Invalid signature");
 
         // Calculate the amount to transfer
@@ -94,6 +100,49 @@ contract BotPayMaster is Ownable {
         payable(to).transfer(transferAmount);
 
         emit ChequeCashed(from, to, amount, nonce);
+    }
+
+    function isChequeValid(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 nonce,
+        bytes memory signature
+    ) public view returns (bool) {
+        // Check if the bot is approved
+        if (!approvedBots[from]) {
+            return false;
+        }
+
+        // Check if the recipient address is valid
+        if (to == address(0)) {
+            return false;
+        }
+
+        // Retrieve the last transaction for this bot and recipient
+        BotTransaction memory botTx = botTransactionsStore[from][to];
+
+        // Check if the nonce is valid (greater than the last used nonce)
+        if (nonce <= botTx.lastNonce) {
+            return false;
+        }
+
+        // Check if the amount is valid (greater than the last known amount)
+        if (amount <= botTx.lastAmount) {
+            return false;
+        }
+
+        // Generate the message hash from the parameters
+        bytes32 messageHash = getChequeHash(from, to, amount, nonce);
+
+        // Check if the signature is valid and matches the 'from' address
+        // Note: This assumes the existence of a correct implementation of recoverSigner
+        if (recoverSigner(messageHash, signature) != from) {
+            return false;
+        }
+
+        // If all checks pass, return true
+        return true;
     }
 
     function getBotTransaction(address _from, address _to) public view returns (BotTransaction memory) {

@@ -1,0 +1,12 @@
+{
+  "name": "camino-bot-paymaster",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:havan/camino-bot-manager.git",
+  "author": "Ekrem Seren <ekrem.seren@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.11.1"
+  }
+}

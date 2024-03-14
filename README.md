@@ -40,6 +40,8 @@ funds for multiple bot accounts (wallets).
 - **PayMaster Address in Cheques:** It may be a good idea to include PayMaster's
   contract address in the cheque, so the cheque is only valid for a specific
   PayMaster.
+- **Partner Configuration:** This whole concept can also be implemented directly on core T-Chain
+  functionality, inside the Partner Configuration.
 
 ## Design
 
